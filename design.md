@@ -367,6 +367,32 @@ Each task below is a kanban card for the build phase. Tagged with the appropriat
 
 ## 10. Verification — evidence from build
 
+### FR → acceptance test traceability
+
+Each functional requirement has a dedicated black-box acceptance suite:
+
+| FR | Test file | What it covers | Tests |
+|----|-----------|----------------|-------|
+| FR1 | `verify/acceptance/test_fr1_client_identification.py` | X-API-Key priority over X-User-ID; unknown client_type pass-through | 3 |
+| FR2 | `verify/acceptance/test_fr2_token_bucket.py` | Burst allowance (5/5), exhaustion (6th denied), time-based refill (50 ms) | 3 |
+| FR3 | `verify/acceptance/test_fr3_rejection_headers.py` | Allow/deny headers, reset_at in future, limit matches rule config | 5 |
+| FR4 | `verify/acceptance/test_fr4_algorithm_support.py` | Both algorithms, independence, no burst on sliding window, rule CRUD lifecycle | 5 |
+
+**Total: 16/16 acceptance tests passing**, each auto-resetting via `POST /ratelimit/rules/admin/reset` before running (see `verify/acceptance/conftest.py`).
+
+### CI pipeline
+
+[![CI](https://github.com/iliazlobin/sd-rate-limiter-backend-mvp/actions/workflows/ci.yml/badge.svg)](https://github.com/iliazlobin/sd-rate-limiter-backend-mvp/actions/workflows/ci.yml)
+
+`.github/workflows/ci.yml` — 4 jobs on every push, PR, and daily at 06:00 UTC:
+
+| Job | What it runs | Status |
+|-----|-------------|--------|
+| **Lint** | `ruff check src/ tests/ verify/` | 0 issues (E, F, I, W) across all 18 files |
+| **Test** | `pytest tests/ -v` | 1/1 unit tests passing |
+| **Docker** | `docker build .` | Multi-stage build compiles cleanly |
+| **E2E** | `docker compose up` → acceptance → teardown | 16/16 acceptance tests passing |
+
 ### Lint
 - **ruff check src/ tests/ verify/**: All checks passed — 0 issues (E, F, I, W)
 - Verified against full codebase (12 source files + 5 test files + 1 conftest)

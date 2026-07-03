@@ -192,6 +192,8 @@ Four acceptance suites covering every functional requirement:
 
 ### CI pipeline
 
+[![CI](https://github.com/iliazlobin/sd-rate-limiter-backend-mvp/actions/workflows/ci.yml/badge.svg)](https://github.com/iliazlobin/sd-rate-limiter-backend-mvp/actions/workflows/ci.yml)
+
 `.github/workflows/ci.yml` runs 4 jobs on every push:
 
 1. **Lint** — ruff check (E, F, I, W)
