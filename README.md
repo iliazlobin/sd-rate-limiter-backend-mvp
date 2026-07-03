@@ -247,4 +247,4 @@ See [DEPLOY.md](DEPLOY.md) for full instructions — Docker Compose, staging slo
 
 ## Design
 
-See [design.md](design.md) for the full architecture decision record — requirements, data model, deep dives on thread safety (per-bucket `asyncio.Lock` vs global lock vs lock-free), sliding window math, and trade-off analysis.
+See [DESIGN.md](DESIGN.md) for the full design document — architecture overview, FR→acceptance-test traceability matrix, verification results (16/16 acceptance tests passing, CI pipeline). For deeper system-design deep dives, see [`design.md`](design.md).
