@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime
+*.rdb
+dump.rdb
+
+# Test artifacts
+.pytest_cache/
+verify/logs/
+verify/state/
+.venv/
+__pycache__/
+*.pyc
+.env
+*.egg-info/
+data/

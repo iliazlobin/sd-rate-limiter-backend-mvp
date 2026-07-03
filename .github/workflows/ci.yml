@@ -1,0 +1,65 @@
+# CI — unit tests + e2e acceptance via docker compose
+# Sources verify/manifest.env for UP/DOWN/READY/LOGS vars.
+---
+name: CI
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 6 * * *"
+
+env:
+  DATABASE_URL: ""
+  REDIS_URL: ""
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dev dependencies
+        run: pip install -e '.[dev]'
+      - name: Run unit tests
+        run: pytest tests/ -v
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load manifest env
+        run: |
+          set -a
+          . verify/manifest.env
+          set +a
+          echo "PORT=$PORT" >> "$GITHUB_ENV"
+          echo "UP=$UP" >> "$GITHUB_ENV"
+          echo "READY=$READY" >> "$GITHUB_ENV"
+          echo "DOWN=$DOWN" >> "$GITHUB_ENV"
+          echo "LOGS=$LOGS" >> "$GITHUB_ENV"
+          echo "TEST_DEPS=$TEST_DEPS" >> "$GITHUB_ENV"
+          echo "ACCEPTANCE=$ACCEPTANCE" >> "$GITHUB_ENV"
+      - name: Start stack
+        run: eval "$UP"
+      - name: Wait for ready
+        run: |
+          for i in $(seq 1 30); do
+            if eval "$READY" >/dev/null 2>&1; then
+              echo "Stack ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Stack not ready after 60s"
+          eval "$LOGS"
+          exit 1
+      - name: Install test deps & run acceptance
+        run: |
+          pip install $TEST_DEPS
+          API_BASE_URL=http://localhost:${PORT} $ACCEPTANCE
+      - name: Tear down
+        if: always()
+        run: eval "$DOWN"

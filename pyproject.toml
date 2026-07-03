@@ -1,0 +1,40 @@
+[project]
+name = "rate-limiter"
+version = "0.1.0"
+description = "Single-process in-memory rate limiter MVP — token bucket + sliding window"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "pydantic-settings>=2.0,<3.0",
+    "uvicorn[standard]>=0.30,<1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0,<9.0",
+    "pytest-asyncio>=0.24,<1.0",
+    "httpx>=0.27,<1.0",
+    "ruff==0.15.20",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["rate_limiter*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+"verify/acceptance/*.py" = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"

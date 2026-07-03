@@ -1,0 +1,64 @@
+# Rate Limiter MVP — Docker Compose
+#
+#   docker compose up -d --wait
+#   curl http://localhost:${APP_PORT:-8010}/healthz
+#
+# Uses an x- YAML anchor for shared env vars. Override via `.env` or shell env.
+
+x-app-vars: &app-vars
+  RATELIMIT_HOST: "${RATELIMIT_HOST:-0.0.0.0}"
+  RATELIMIT_PORT: "${RATELIMIT_PORT:-8000}"
+  RATELIMIT_DEFAULT_LIMIT: "${RATELIMIT_DEFAULT_LIMIT:-100}"
+  RATELIMIT_DEFAULT_WINDOW_SEC: "${RATELIMIT_DEFAULT_WINDOW_SEC:-60}"
+  RATELIMIT_DEFAULT_BURST: "${RATELIMIT_DEFAULT_BURST:-100}"
+  RATELIMIT_LOCK_CLEANUP_INTERVAL_SEC: "${RATELIMIT_LOCK_CLEANUP_INTERVAL_SEC:-60}"
+  RATELIMIT_BUCKET_IDLE_TTL_SEC: "${RATELIMIT_BUCKET_IDLE_TTL_SEC:-300}"
+
+services:
+  app:
+    container_name: rate-limiter-app
+    build: .
+    ports:
+      - "${APP_PORT:-8010}:${RATELIMIT_PORT:-8000}"
+    environment:
+      <<: *app-vars
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - rate-limiter-net
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:${RATELIMIT_PORT:-8000}/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 8s
+
+  # ---- Optional: Redis backend for distributed rate limiting ----
+  # Uncomment to enable Redis-based persistence instead of in-memory.
+  # Requires: RATELIMIT_REDIS_URL=redis://redis:6379/0 env var.
+  #
+  # redis:
+  #   container_name: rate-limiter-redis
+  #   image: redis:7-alpine
+  #   restart: unless-stopped
+  #   networks:
+  #     - rate-limiter-net
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 5s
+  #     timeout: 3s
+  #     retries: 3
+  #     start_period: 3s
+  #   ports:
+  #     - "6379"
+  #   volumes:
+  #     - redis-data:/data
+
+networks:
+  rate-limiter-net:
+    name: rate-limiter-net
+    driver: bridge
+
+# volumes:
+#   redis-data:

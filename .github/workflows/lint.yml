@@ -1,0 +1,26 @@
+# Lint — ruff check + format check
+# Pinned to ruff==0.15.20 (must match pyproject.toml dev deps)
+---
+name: Lint
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * *"
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install 'ruff==0.15.20'
+      - name: ruff check
+        run: ruff check --output-format=github
+      - name: ruff format check
+        run: ruff format --check
