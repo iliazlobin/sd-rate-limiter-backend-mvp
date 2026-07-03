@@ -35,3 +35,10 @@ __pycache__/
 .env
 *.egg-info/
 data/
+.venv*/
+env/
+.ruff_cache/
+.mypy_cache/
+*.log
+.finalize.lock/
+.noship
