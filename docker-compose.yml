@@ -22,8 +22,6 @@ services:
       - "${APP_PORT:-8010}:${RATELIMIT_PORT:-8000}"
     environment:
       <<: *app-vars
-    env_file:
-      - .env
     restart: unless-stopped
     networks:
       - rate-limiter-net
